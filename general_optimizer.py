@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+import sys
 from tensorflow.examples.tutorials.mnist import input_data
 
 flags = tf.app.flags
@@ -12,6 +12,15 @@ flags.DEFINE_float('dropout', 0.5, 'Keep probability for training dropout.')
 flags.DEFINE_string('data_dir', '/tmp/data', 'Directory for storing data')
 flags.DEFINE_string('summaries_dir', '/tmp/optimizer_logs', 'Summaries directory')
 
+optimizer = {}
+
+optimizer["adam"] = tf.train.AdamOptimizer
+optimizer["adadelta"] = tf.train.AdadeltaOptimizer
+optimizer["adagrad"] = tf.train.AdagradOptimizer
+optimizer["momentum"] = tf.train.MomentumOptimizer
+optimizer["sgd"] = tf.train.GradientDescentOptimizer
+optimizer["rmsprop"] = tf.train.RMSPropOptimizer
+optimizer["ftrl"] = tf.train.FtrlOptimizer
 
 def weight_variable(shape):
   initial = tf.truncated_normal(shape, stddev=0.1)
@@ -26,7 +35,7 @@ def conv2d(x, W):
 
 def max_pool_2x2(x):
   return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-def train():
+def train(optimizer_name):
 
   def feed_dict(train):
     """Make a TensorFlow feed_dict: maps data onto Tensor placeholders."""
@@ -118,8 +127,12 @@ def train():
       with tf.name_scope('total'):
           cross_entropy = -tf.reduce_mean(diff)
       tf.scalar_summary('cross entropy', cross_entropy)
-  with tf.name_scope('train'):
-      train_step = tf.train.AdamOptimizer(FLAGS.learning_rate).minimize(cross_entropy)
+  with tf.name_scope('train/' + optimizer_name):
+      if optimizer_name in optimizer:
+        train_step = optimizer[optimizer_name](FLAGS.learning_rate).minimize(cross_entropy)
+      else:
+        print(optimizer_name + " is not one of the supported optimizers. Using Adam")
+        train_step = tf.train.AdamOptimizer(FLAGS.learning_rate).minimize(cross_entropy)
   with tf.name_scope('accuracy'):
       with tf.name_scope('correct_prediction'):
           correct_prediction = tf.equal(tf.argmax(y_hat, 1), tf.argmax(y_, 1))
@@ -163,7 +176,8 @@ def main(_):
   if tf.gfile.Exists(FLAGS.summaries_dir):
     tf.gfile.DeleteRecursively(FLAGS.summaries_dir)
   tf.gfile.MakeDirs(FLAGS.summaries_dir)
-  train()
+  if len(sys.argv) > 1:
+    train(sys.argv[1])
 
 
 if __name__ == '__main__':
