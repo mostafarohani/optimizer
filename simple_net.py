@@ -2,6 +2,7 @@
 # from __future__ import division
 # from __future__ import print_function
 from tf_utils import *
+from gn  import *
 
 import numpy as np
 import tensorflow as tf
@@ -35,7 +36,7 @@ def nn_layer(input_tensor, input_dim, output_dim, layer_name, act=tf.nn.relu):
     with tf.name_scope('Wx_plus_b'):
       preactivate = tf.matmul(input_tensor, weights) + biases
       # tf.histogram_summary(layer_name + '/pre_activations', preactivate)
-    activations = act(preactivate, 'activation')
+    activations = act(preactivate, name = 'activation')
     # tf.histogram_summary(layer_name + '/activations', activations)
     return weights, activations
 def train():
@@ -62,8 +63,9 @@ def train():
     cross_entropy = -tf.reduce_mean(diff)
     tf.scalar_summary('cross entropy', cross_entropy)
   with tf.name_scope('train'):  
-    optimizer  = tf.train.AdamOptimizer(FLAGS.learning_rate)
-        # optimizer  = tf.train.GNOptimizer(FLAGS.learning_rate, cross_entropy, y_hat)
+    #optimizer  = tf.train.AdamOptimizer(FLAGS.learning_rate)
+    print(type(cross_entropy))
+    optimizer  = GNOptimizer(cross_entropy, y_hat, learning_rate = FLAGS.learning_rate)
     train_step = optimizer.minimize(cross_entropy)
   with tf.name_scope('accuracy'):
     with tf.name_scope('correct_prediction'):

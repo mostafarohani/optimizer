@@ -42,7 +42,8 @@ def nn_layer(input_tensor, input_dim, output_dim, layer_name, act=tf.nn.relu):
     with tf.name_scope('Wx_plus_b'):
       preactivate = tf.matmul(input_tensor, weights) + biases
       # tf.histogram_summary(layer_name + '/pre_activations', preactivate)
-    activations = act(preactivate, 'activation')
+    print(type(preactivate), preactivate);
+    activations = act(preactivate, name='activation')
     # tf.histogram_summary(layer_name + '/activations', activations)
     return activations
 def conv_max_layer(input_tensor, conv_dim, input_dim, output_dim, layer_name, act =tf.nn.relu):
