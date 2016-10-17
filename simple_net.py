@@ -2,7 +2,6 @@
 # from __future__ import division
 # from __future__ import print_function
 from tf_utils import *
-from gn  import *
 
 import numpy as np
 import tensorflow as tf
@@ -65,7 +64,7 @@ def train():
   with tf.name_scope('train'):  
     #optimizer  = tf.train.AdamOptimizer(FLAGS.learning_rate)
     print(type(cross_entropy))
-    optimizer  = GNOptimizer(cross_entropy, y_hat, learning_rate = FLAGS.learning_rate)
+    optimizer  = tf.train.AdamOptimizer(learning_rate = FLAGS.learning_rate)
     train_step = optimizer.minimize(cross_entropy)
   with tf.name_scope('accuracy'):
     with tf.name_scope('correct_prediction'):
